@@ -11,12 +11,15 @@ import android.view.View
 import android.widget.Switch
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import com.mihab.downloader.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.logging.Logger
 
 class MainActivity : AppCompatActivity() {
@@ -33,9 +36,9 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         binding.btnStartDownload.setOnClickListener {
-            Toast.makeText(it.context, "Started", Toast.LENGTH_SHORT).show()
+            Toast.makeText(it.context, "Download Started", Toast.LENGTH_SHORT).show()
             beginDownload()
-            binding.btnStartDownload.visibility = View.GONE
+            //binding.btnStartDownload.visibility = View.GONE
         }
 
     }
@@ -43,7 +46,8 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("Range")
     fun beginDownload() {
 
-        val url = "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"
+        val url =
+            "https://file-examples.com/storage/fe1134defc6538ed39b8efa/2017/04/file_example_MP4_1280_10MG.mp4"
         var fileName = url.substring(url.lastIndexOf('/') + 1)
         fileName = fileName.substring(0, 1).uppercase().plus(fileName.substring(1))
 
@@ -60,46 +64,45 @@ class MainActivity : AppCompatActivity() {
         var isFinishedDownload = false
         var progress: Int
 
-        CoroutineScope(Default).launch {
-            while (!isFinishedDownload) {
-                var abc = binding.progressBar.progress
-                val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadID))
-                if (cursor.moveToFirst()) {
-                    val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                    when (status) {
-                        DownloadManager.STATUS_FAILED -> {
-                            isFinishedDownload = true
-                            break
-                        }
-                        DownloadManager.STATUS_PAUSED -> break
-                        DownloadManager.STATUS_PENDING -> break
-                        DownloadManager.STATUS_RUNNING -> {
-                            val total = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-                            if (total >= 0) {
-                                val downloaded = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                                progress = ((downloaded * 100L) / total).toInt()
-                                //Toast.makeText(applicationContext, "progress : $progress", Toast.LENGTH_SHORT).show()
-                                /*if (abc < 100) {
-                                    abc += 1
-                                    binding.progressBar.progress = abc
-                                }*/
-                                binding.progressBar.progress = progress
-                                Log.d("MainActivity","progress : $progress")
-                                Log.d("MainActivity","ABC : $abc")
 
-                            }
-                            break
-                        }
-                        DownloadManager.STATUS_SUCCESSFUL -> {
-                            progress =  100
-                            isFinishedDownload = true
+        while (!isFinishedDownload) {
+            var abc = binding.progressBar.progress
+            val cursor = downloadManager.query(DownloadManager.Query().setFilterById(downloadID))
+            if (cursor.moveToFirst()) {
+                val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                when (status) {
+                    DownloadManager.STATUS_FAILED -> {
+                        isFinishedDownload = true
+                        break
+                    }
+
+                    DownloadManager.STATUS_PAUSED -> break
+                    DownloadManager.STATUS_PENDING -> break
+                    DownloadManager.STATUS_RUNNING -> {
+                        val total =
+                            cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                        if (total >= 0) {
+                            val downloaded =
+                                cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                            progress = ((downloaded * 100L) / total).toInt()
+
                             binding.progressBar.progress = progress
-                            //Toast.makeText(applicationContext, "Download Completed", Toast.LENGTH_SHORT).show()
-                            break
+                            Log.d("MainActivity", "progress : $progress")
+                            Log.d("MainActivity", "ABC : $abc")
+
                         }
+                        break
+                    }
+
+                    DownloadManager.STATUS_SUCCESSFUL -> {
+                        progress = 100
+                        isFinishedDownload = true
+                        binding.progressBar.progress = progress
+                        break
                     }
                 }
             }
+
         }
 
 
