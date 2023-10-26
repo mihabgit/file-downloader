@@ -60,8 +60,6 @@ class MainActivity : AppCompatActivity() {
         var isFinishedDownload = false
         var progress: Int
 
-        Log.d("Mihab", "BABu")
-
         CoroutineScope(Default).launch {
             while (!isFinishedDownload) {
                 var abc = binding.progressBar.progress
