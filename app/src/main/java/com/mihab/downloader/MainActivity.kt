@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("Range")
     fun beginDownload() {
 
-        val url = "https://file-examples.com/storage/fe1207564e65327fe9c8723/2017/04/file_example_MP4_1280_10MG.mp4"
+        val url = "https://filesamples.com/samples/video/mp4/sample_1280x720.mp4"
         var fileName = url.substring(url.lastIndexOf('/') + 1)
         fileName = fileName.substring(0, 1).uppercase().plus(fileName.substring(1))
 
